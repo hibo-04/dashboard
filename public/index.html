@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Desktop-Toggle: Sidebar ausblenden, wenn .active */
+    .sidebar.active {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    /* Standard sidebar in place */
+    .sidebar {
+      transition: transform 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="layout">
+      <aside id="sidebar" class="sidebar"></aside>
+      <main class="main">
+        <div class="topbar">
+          <button id="toggle-sidebar" class="menu-button">☰</button>
+          <h1 id="page-title">Dashboard</h1>
+          <div>👤 Max Mustermann</div>
+        </div>
+        <div id="page-content"></div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+  const routes = {
+    dashboard: 'pages/dashboard.html',
+    dienste: 'pages/dienste.html',
+    benutzer: 'pages/benutzer.html',
+    berichte: 'pages/berichte.html',
+    einstellungen: 'pages/einstellungen.html',
+  };
+
+  async function loadPage(hash) {
+    const page = hash.replace('#', '') || 'dashboard';
+    const title = page.charAt(0).toUpperCase() + page.slice(1);
+    document.getElementById('page-title').innerText = title;
+
+    if (routes[page]) {
+      const res = await fetch(routes[page]);
+      const html = await res.text();
+      document.getElementById('page-content').innerHTML = html;
+    } else {
+      document.getElementById('page-content').innerHTML = '<p>Seite nicht gefunden.</p>';
+    }
+  }
+
+  async function loadSidebar() {
+    const res = await fetch('components/sidebar.html');
+    const html = await res.text();
+    document.getElementById('sidebar').innerHTML = html;
+
+    // Toggle-Button ist jetzt im DOM – jetzt EventListener setzen
+    const toggleBtn = document.getElementById('toggle-sidebar');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('active');
+      });
+    }
+  }
+
+  window.addEventListener('hashchange', () => loadPage(location.hash));
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadSidebar();
+    loadPage(location.hash);
+  });
+</script>
+
+</body>
+</html>

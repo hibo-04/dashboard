@@ -1,22 +1,32 @@
+// public/scripts/benutzer.js
+
 async function fetchUserList() {
   try {
-    const response = await fetch('/api/users');
-    const users = await response.json();
+    const res = await fetch('/api/users');
+    const users = await res.json();
 
-    const container = document.getElementById('user-list');
-    if (!container) return;
+    const listContainer = document.getElementById('user-list');
 
-    container.innerHTML = '';
+    if (users.length === 0) {
+      listContainer.innerHTML = '<p>Keine Benutzer vorhanden.</p>';
+      return;
+    }
 
+    const list = document.createElement('ul');
     users.forEach(user => {
-      const userDiv = document.createElement('div');
-      userDiv.textContent = `${user.id} – ${user.name} (${user.email})`;
-      container.appendChild(userDiv);
+      const item = document.createElement('li');
+      item.textContent = `${user.name} (${user.email})`;
+      list.appendChild(item);
     });
+
+    listContainer.innerHTML = '';
+    listContainer.appendChild(list);
+
   } catch (error) {
     console.error('Fehler beim Laden der Benutzer:', error);
+    document.getElementById('user-list').innerHTML =
+      '<p>Fehler beim Laden der Benutzer.</p>';
   }
 }
 
-// Beim Laden der Seite ausführen
-document.addEventListener('DOMContentLoaded', fetchUserList);
+fetchUserList();

@@ -3,7 +3,7 @@ console.log("benutzer.js wurde geladen");
 
 async function fetchUserList() {
   try {
-    const res = await fetch('/api/users');
+    const res = await fetch('https://dashboard-server-zm7f.onrender.com/api/users/');
     const users = await res.json();
 
     const listContainer = document.getElementById('user-list');

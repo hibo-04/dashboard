@@ -19,9 +19,8 @@ app.use(express.static(path.join(__dirname, '../public')));
 const usersRouter = require('./routes/users');
 app.use('/api/users', usersRouter);
 
-// Test-Route
 app.get('/', (req, res) => {
-  res.send('Backend läuft. API-Endpunkte sind z.B. unter /api/test-db erreichbar.');
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Datenbankverbindungs-Test-Route

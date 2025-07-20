@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..')));
 
 // API-Routen
-const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/useras');
 app.use('/api/users', usersRouter);
 
 // Fallback: index.html für alle anderen Routen ausliefern

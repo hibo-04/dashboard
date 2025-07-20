@@ -60,6 +60,16 @@
 
           content.innerHTML = html;
 
+          // Nachladen von Scripts aus dem HTML-Inhalt
+          const scripts = temp.querySelectorAll('script[src]');
+          scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            newScript.src = oldScript.src;
+            newScript.type = oldScript.type || 'text/javascript';
+            document.body.appendChild(newScript);
+          });
+
+
           // Aktiven Menüpunkt markieren
           const links = document.querySelectorAll('.nav-menu a');
           links.forEach(link => {

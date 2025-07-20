@@ -1,4 +1,5 @@
 // public/scripts/benutzer.js
+console.log("benutzer.js wurde geladen");
 
 async function fetchUserList() {
   try {

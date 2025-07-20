@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Statische Dateien aus dem "public"-Ordner bereitstellen
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '..')));
 
 // API-Routen
 const usersRouter = require('./routes/users');

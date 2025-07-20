@@ -1,41 +1,36 @@
 // server.js
-
-require('dotenv').config();
 const express = require('express');
-const { Pool } = require('pg');
 const cors = require('cors');
+require('dotenv').config();
+const pool = require('./db'); // Verbindung zur Datenbank
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS aktivieren (optional, falls dein Frontend auf einer anderen Domain läuft)
+// Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // Für JSON-Parsing bei POST/PUT-Requests
 
-// PostgreSQL-Verbindung über Pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // Für Render wichtig (SSL aktiv)
-  },
-});
+// Benutzer-Router einbinden
+const usersRouter = require('./routes/users');
+app.use('/api/users', usersRouter);
 
-// Test-Route für DB-Verbindung
-app.get('/api/test-db', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.send(`Datenbankverbindung erfolgreich! Zeitstempel: ${result.rows[0].now}`);
-  } catch (error) {
-    console.error('Fehler bei der Verbindung zur Datenbank:', error);
-    res.status(500).send('Fehler bei der Verbindung zur Datenbank');
-  }
-});
-
-// Root-Route (optional)
+// Test-Route
 app.get('/', (req, res) => {
   res.send('Backend läuft. API-Endpunkte sind z.B. unter /api/test-db erreichbar.');
 });
 
+// Datenbankverbindungs-Test-Route
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const now = new Date().toString();
+    res.send(`Datenbankverbindung erfolgreich! Zeitstempel: ${now}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Fehler bei der Verbindung zur Datenbank');
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`✅ Server läuft auf Port ${PORT}`);
+  console.log(`Server läuft auf Port ${PORT}`);
 });

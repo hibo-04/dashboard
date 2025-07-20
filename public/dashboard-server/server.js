@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Statische Dateien aus dem "public"-Ordner bereitstellen
+// Statische Dateien
 app.use(express.static(path.join(__dirname, '..')));
 
 // API-Routen

@@ -15,6 +15,16 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+app.get('/test-db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.send(`Datenbankverbindung erfolgreich! Zeitstempel: ${result.rows[0].now}`);
+  } catch (err) {
+    console.error('Fehler bei DB-Verbindung:', err);
+    res.status(500).send('Fehler bei der Verbindung zur Datenbank.');
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server läuft auf Port ${PORT}`);
 });

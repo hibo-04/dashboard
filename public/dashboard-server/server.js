@@ -2,28 +2,29 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const path = require('path'); // ⬅️ NEU
-const pool = require('./db'); // Verbindung zur Datenbank
+const path = require('path');
+const pool = require('./db'); // PostgreSQL-Verbindung
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Für JSON-Parsing bei POST/PUT-Requests
+app.use(express.json());
 
-// ⬇️ NEU: Statische Dateien aus "public/" bereitstellen
+// Statische Dateien aus dem "public"-Ordner bereitstellen
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Benutzer-Router einbinden
+// API-Routen
 const usersRouter = require('./routes/users');
 app.use('/api/users', usersRouter);
 
-app.get('/', (req, res) => {
+// Fallback: index.html für alle anderen Routen ausliefern
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Datenbankverbindungs-Test-Route
+// DB-Verbindung testen (optional)
 app.get('/api/test-db', async (req, res) => {
   try {
     const now = new Date().toString();

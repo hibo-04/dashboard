@@ -5,7 +5,7 @@ const pool = require('../db');
 // GET /api/users – alle Benutzer abrufen
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, username, email, created_at FROM users ORDER BY id ASC');
+    const result = await pool.query('SELECT id, username, email, created_at FROM benutzer ORDER BY id ASC');
     res.json(result.rows);
   } catch (error) {
     console.error('Fehler beim Abrufen der Benutzer:', error);

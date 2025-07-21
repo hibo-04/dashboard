@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-app.post('/api/users', async (req, res) => {
+router.post('/', async (req, res) => {
   const { name, email } = req.body;
   try {
     const result = await pool.query(
@@ -22,8 +22,8 @@ app.post('/api/users', async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Fehler beim Erstellen' });
+    console.error('Fehler beim Erstellen:', err);
+    res.status(500).json({ error: 'Fehler beim Erstellen des Benutzers' });
   }
 });
 

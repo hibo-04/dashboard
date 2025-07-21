@@ -13,15 +13,39 @@ async function fetchUserList() {
       return;
     }
 
-    const list = document.createElement('ul');
+    const table = document.createElement('table');
+    table.classList.add('');
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>E-Mail</th>
+        <th>Erstellt am</th>
+        <th>Aktionen</th>
+      </tr>`;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
     users.forEach(user => {
-      const item = document.createElement('li');
-      item.textContent = `${user.name} (${user.email})`;
-      list.appendChild(item);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${user.id}</td>
+        <td>${user.name}</td>
+        <td>${user.email}</td>
+        <td>${user.erstellt_am || '-'}</td>
+        <td>
+          <button class="edit-btn" data-id="${user.id}">Bearbeiten</button>
+          <button class="delete-btn" data-id="${user.id}">Löschen</button>
+        </td>
+      `;
+      tbody.appendChild(row);
     });
 
+    table.appendChild(tbody);
     listContainer.innerHTML = '';
-    listContainer.appendChild(list);
+    listContainer.appendChild(table);
 
   } catch (error) {
     console.error('Fehler beim Laden der Benutzer:', error);
@@ -29,6 +53,7 @@ async function fetchUserList() {
       '<p>Fehler beim Laden der Benutzer.</p>';
   }
 }
+
 
 document.getElementById('benutzer-form').addEventListener('submit', async (e) => {
   e.preventDefault();

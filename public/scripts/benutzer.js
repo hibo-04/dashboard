@@ -14,7 +14,6 @@ async function fetchUserList() {
     }
 
     const table = document.createElement('table');
-    table.classList.add();
 
     const thead = document.createElement('thead');
     thead.innerHTML = `

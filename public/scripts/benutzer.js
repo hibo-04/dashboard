@@ -34,11 +34,12 @@ document.getElementById('benutzer-form').addEventListener('submit', async (e) =>
   e.preventDefault();
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
+  const passwort = document.getElementById('passwort').value;
 
-  const response = await fetch('/https://dashboard-server-zm7f.onrender.com/api/users/users', {
+  const response = await fetch('https://dashboard-server-zm7f.onrender.com/api/users', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email })
+    body: JSON.stringify({ name, email, passwort })
   });
 
   if (response.ok) {

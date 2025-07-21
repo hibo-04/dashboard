@@ -15,18 +15,20 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const { name, email } = req.body;
+  console.log('POST request empfangen:', name, email); // 🧪
+
   try {
     const result = await pool.query(
       'INSERT INTO benutzer (name, email) VALUES ($1, $2) RETURNING *',
       [name, email]
     );
+    console.log('SQL-Ergebnis:', result.rows); // 🧪
     res.status(201).json(result.rows[0]);
   } catch (err) {
-  console.error('Fehler beim Erstellen:', err.message);
-  console.error('Stacktrace:', err.stack);
-  res.status(500).json({ error: err.message });
+    console.error('Fehler beim Erstellen:', err.message);
+    console.error(err.stack);
+    res.status(500).json({ error: err.message });
   }
 });
-
 
 module.exports = router;

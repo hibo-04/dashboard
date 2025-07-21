@@ -42,8 +42,9 @@ document.getElementById('benutzer-form').addEventListener('submit', async (e) =>
   });
 
   if (response.ok) {
-    alert('Benutzer erfolgreich erstellt');
-    loadUsers(); // reload table
+  alert('Benutzer erfolgreich erstellt');
+  document.getElementById('benutzer-form').reset();
+  fetchUserList();
   } else {
     alert('Fehler beim Erstellen');
   }

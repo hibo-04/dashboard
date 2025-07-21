@@ -22,8 +22,9 @@ router.post('/', async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error('Fehler beim Erstellen:', err);
-    res.status(500).json({ error: 'Fehler beim Erstellen des Benutzers' });
+  console.error('Fehler beim Erstellen:', err.message);
+  console.error('Stacktrace:', err.stack);
+  res.status(500).json({ error: err.message });
   }
 });
 

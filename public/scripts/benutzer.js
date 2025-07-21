@@ -32,11 +32,10 @@ async function fetchUserList() {
 
 document.getElementById('benutzer-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
 
-  const response = await fetch('/api/users', {
+  const response = await fetch('/https://dashboard-server-zm7f.onrender.com/api/users/users', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, email })
@@ -44,11 +43,10 @@ document.getElementById('benutzer-form').addEventListener('submit', async (e) =>
 
   if (response.ok) {
     alert('Benutzer erfolgreich erstellt');
-    loadUsers(); // neu laden
+    loadUsers(); // reload table
   } else {
     alert('Fehler beim Erstellen');
   }
 });
-
 
 fetchUserList();

@@ -30,4 +30,25 @@ async function fetchUserList() {
   }
 }
 
+document.getElementById('benutzer-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+
+  const response = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email })
+  });
+
+  if (response.ok) {
+    alert('Benutzer erfolgreich erstellt');
+    loadUsers(); // neu laden
+  } else {
+    alert('Fehler beim Erstellen');
+  }
+});
+
+
 fetchUserList();

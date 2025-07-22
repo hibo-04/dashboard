@@ -75,7 +75,6 @@ async function fetchUserList() {
   }
 }
 
-// Modal: Bearbeiten
 function openEditModal(user) {
   document.getElementById('edit-id').value = user.id;
   document.getElementById('edit-name').value = user.name;
@@ -88,35 +87,6 @@ function closeEditModal() {
   document.getElementById('edit-modal').style.display = 'none';
 }
 
-document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
-
-document.getElementById('edit-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const id = document.getElementById('edit-id').value;
-  const name = document.getElementById('edit-name').value;
-  const email = document.getElementById('edit-email').value;
-  const passwort = document.getElementById('edit-passwort').value;
-
-  const payload = { name, email };
-  if (passwort) payload.passwort = passwort;
-
-  try {
-    const res = await fetch(`https://dashboard-server-zm7f.onrender.com/api/users/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error('Update fehlgeschlagen');
-
-    closeEditModal();
-    showNotification('Benutzer erfolgreich bearbeitet');
-    fetchUserList();
-  } catch (err) {
-    showNotification('Fehler beim Speichern: ' + err.message, 'error');
-  }
-});
-
-// Modal: Löschen
 function openDeleteModal(user) {
   currentDeleteId = user.id;
   document.getElementById('delete-confirm-text').textContent = `Benutzer "${user.name}" wirklich löschen?`;
@@ -128,58 +98,86 @@ function closeDeleteModal() {
   document.getElementById('delete-modal').style.display = 'none';
 }
 
-document.getElementById('cancel-delete').addEventListener('click', closeDeleteModal);
+// ✅ Initialisierung der Benutzer-Seite (wird von index.html aufgerufen)
+export function initBenutzerSeite() {
+  fetchUserList();
 
-document.getElementById('confirm-delete').addEventListener('click', async () => {
-  try {
-    const res = await fetch(`https://dashboard-server-zm7f.onrender.com/api/users/${currentDeleteId}`, {
-      method: 'DELETE'
-    });
-    if (!res.ok) throw new Error('Löschen fehlgeschlagen');
+  initFab({
+    icon: '＋',
+    tooltip: 'Benutzer hinzufügen',
+    onClick: () => {
+      document.getElementById('create-modal').style.display = 'flex';
+    }
+  });
 
-    closeDeleteModal();
-    showNotification('Benutzer erfolgreich gelöscht');
-    fetchUserList();
-  } catch (err) {
-    showNotification('Fehler beim Löschen: ' + err.message, 'error');
-  }
-});
+  document.getElementById('cancel-edit')?.addEventListener('click', closeEditModal);
 
-// Modal: Benutzer erstellen
-document.getElementById('cancel-create').addEventListener('click', () => {
-  document.getElementById('create-modal').style.display = 'none';
-});
+  document.getElementById('edit-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('edit-id').value;
+    const name = document.getElementById('edit-name').value;
+    const email = document.getElementById('edit-email').value;
+    const passwort = document.getElementById('edit-passwort').value;
 
-document.getElementById('create-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = document.getElementById('create-name').value;
-  const email = document.getElementById('create-email').value;
-  const passwort = document.getElementById('create-passwort').value;
+    const payload = { name, email };
+    if (passwort) payload.passwort = passwort;
 
-  try {
-    const res = await fetch('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, passwort })
-    });
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-    if (!res.ok) throw new Error('Erstellen fehlgeschlagen');
-    showNotification('Benutzer erfolgreich erstellt');
-    document.getElementById('create-form').reset();
+      if (!res.ok) throw new Error('Update fehlgeschlagen');
+      closeEditModal();
+      showNotification('Benutzer erfolgreich bearbeitet');
+      fetchUserList();
+    } catch (err) {
+      showNotification('Fehler beim Speichern: ' + err.message, 'error');
+    }
+  });
+
+  document.getElementById('cancel-delete')?.addEventListener('click', closeDeleteModal);
+
+  document.getElementById('confirm-delete')?.addEventListener('click', async () => {
+    try {
+      const res = await fetch(`/api/users/${currentDeleteId}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Löschen fehlgeschlagen');
+      closeDeleteModal();
+      showNotification('Benutzer erfolgreich gelöscht');
+      fetchUserList();
+    } catch (err) {
+      showNotification('Fehler beim Löschen: ' + err.message, 'error');
+    }
+  });
+
+  document.getElementById('cancel-create')?.addEventListener('click', () => {
     document.getElementById('create-modal').style.display = 'none';
-    fetchUserList();
-  } catch (err) {
-    showNotification('Fehler beim Erstellen: ' + err.message, 'error');
-  }
-});
+  });
 
-// ✅ Initialisiere den zentralen Floating Action Button
-initFab({
-  icon: '＋',
-  tooltip: 'Benutzer hinzufügen',
-  onClick: () => {
-    document.getElementById('create-modal').style.display = 'flex';
-  }
-});
+  document.getElementById('create-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('create-name').value;
+    const email = document.getElementById('create-email').value;
+    const passwort = document.getElementById('create-passwort').value;
 
-fetchUserList();
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, passwort })
+      });
+
+      if (!res.ok) throw new Error('Erstellen fehlgeschlagen');
+      showNotification('Benutzer erfolgreich erstellt');
+      document.getElementById('create-form').reset();
+      document.getElementById('create-modal').style.display = 'none';
+      fetchUserList();
+    } catch (err) {
+      showNotification('Fehler beim Erstellen: ' + err.message, 'error');
+    }
+  });
+}

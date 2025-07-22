@@ -166,4 +166,37 @@ document.getElementById('benutzer-form').addEventListener('submit', async (e) =>
   }
 });
 
+// Floating Action Button – Öffnet Modal zum Erstellen
+document.getElementById('fab').addEventListener('click', () => {
+  document.getElementById('create-modal').style.display = 'flex';
+});
+
+document.getElementById('cancel-create').addEventListener('click', () => {
+  document.getElementById('create-modal').style.display = 'none';
+});
+
+document.getElementById('create-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('create-name').value;
+  const email = document.getElementById('create-email').value;
+  const passwort = document.getElementById('create-passwort').value;
+
+  try {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, passwort })
+    });
+
+    if (!res.ok) throw new Error('Erstellen fehlgeschlagen');
+    showNotification('Benutzer erfolgreich erstellt');
+    document.getElementById('create-form').reset();
+    document.getElementById('create-modal').style.display = 'none';
+    fetchUserList();
+  } catch (err) {
+    showNotification('Fehler beim Erstellen: ' + err.message, 'error');
+  }
+});
+
+
 fetchUserList();

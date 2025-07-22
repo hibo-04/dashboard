@@ -10,14 +10,6 @@
   <main>
     <div class="page-title" data-title="Benutzerverwaltung"></div>
 
-    <!-- Neuen Benutzer anlegen -->
-    <form id="benutzer-form">
-      <input type="text" id="name" placeholder="Name" required />
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="passwort" placeholder="Passwort" required />
-      <button type="submit">Benutzer erstellen</button>
-    </form>
-
     <!-- Benutzerliste -->
     <section>
       <h2>Benutzerliste</h2>
@@ -53,8 +45,28 @@
     </div>
   </div>
 
+    <!-- Benutzer hinzufügen-Modal -->
+  <div id="create-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Neuen Benutzer hinzufügen</h3>
+      <form id="create-form">
+        <label for="create-name">Name:</label>
+        <input type="text" id="create-name" required /><br />
+        <label for="create-email">E-Mail:</label>
+        <input type="email" id="create-email" required /><br />
+        <label for="create-passwort">Passwort:</label>
+        <input type="password" id="create-passwort" required /><br /><br />
+        <button type="submit">Erstellen</button>
+        <button type="button" id="cancel-create">Abbrechen</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Benachrichtigungscontainer -->
   <div id="notification-container" class="notification-container"></div>
+
+  <!-- Universeller Floating Action Button -->
+<button id="fab" class="fab" title="Aktion hinzufügen">＋</button>
 
   <!-- JavaScript -->
   <script type="module" src="/scripts/benutzer.js"></script>

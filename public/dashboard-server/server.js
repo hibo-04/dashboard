@@ -1,14 +1,15 @@
 // server.js
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 const path = require('path');
-const pool = require('./db'); // PostgreSQL-Verbindung
+require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
-// Middleware
+// === Middleware ===
+
+// CORS: nur Anfragen vom Frontend erlauben
 app.use(cors({
   origin: 'https://dashboard-qhrr.onrender.com',
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
@@ -16,31 +17,42 @@ app.use(cors({
   credentials: false
 }));
 
+// JSON-Parsing für eingehende Requests
 app.use(express.json());
 
-// Statische Dateien
+// Statische Dateien aus dem übergeordneten public-Verzeichnis
 app.use(express.static(path.join(__dirname, '..')));
 
-// API-Routen
+// === Logging (optional) ===
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.originalUrl}`);
+  next();
+});
+
+// === API-Routen ===
 const usersRouter = require('./routes/users');
 app.use('/api/users', usersRouter);
 
-// Fallback: index.html für alle anderen Routen ausliefern
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve('../index.html'));
-});
-
-// DB-Verbindung testen (optional)
+// === Healthcheck/Diagnose ===
 app.get('/api/test-db', async (req, res) => {
   try {
-    const now = new Date().toString();
-    res.send(`Datenbankverbindung erfolgreich! Zeitstempel: ${now}`);
+    res.send(`DB-Zugriff erfolgreich – ${new Date().toISOString()}`);
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Fehler bei der Verbindung zur Datenbank');
+    console.error('Fehler beim DB-Check:', err);
+    res.status(500).send('DB-Verbindungsfehler');
   }
 });
 
+// === Fallback für SPA (Single Page App) ===
+// Nur wenn kein /api/... aufgerufen wird → index.html zurückgeben
+app.get('*', (req, res) => {
+  if (req.originalUrl.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API-Route nicht gefunden' });
+  }
+  res.sendFile(path.join(__dirname, '../index.html'));
+});
+
+// === Serverstart ===
 app.listen(PORT, () => {
-  console.log(`Server läuft auf Port ${PORT}`);
+  console.log(`✅ Server läuft auf Port ${PORT}`);
 });

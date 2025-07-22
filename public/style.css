@@ -168,6 +168,21 @@ tr:nth-child(even) {
   background-color: #f9fafb;
 }
 
+/* in-line editing */
+.inline-input {
+  width: 90%;
+  font-size: 14px;
+}
+
+td .edit-icon {
+  opacity: 0.3;
+  margin-left: 8px;
+}
+
+td:hover .edit-icon {
+  opacity: 1;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .layout {

@@ -27,7 +27,7 @@ app.use('/api/users', usersRouter);
 
 // Fallback: index.html für alle anderen Routen ausliefern
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve('public/index.html'));
+  res.sendFile(path.resolve('../index.html'));
 });
 
 // DB-Verbindung testen (optional)

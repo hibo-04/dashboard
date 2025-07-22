@@ -1,88 +1,62 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db');
 const bcrypt = require('bcrypt');
+const crud = require('../database/crud');
+
+const TABLE = 'benutzer';
+const allowedFields = ['name', 'email', 'passwort']; // nur Eingabe-Felder
 
 // GET /api/users – alle Benutzer abrufen
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT id, name, email, erstellt_am FROM benutzer ORDER BY id ASC'
-    );
-    res.json(result.rows);
+    const users = await crud.readAll(TABLE, ['id', 'name', 'email', 'erstellt_am']);
+    res.json(users);
   } catch (error) {
     console.error('Fehler beim Abrufen der Benutzer:', error);
     res.status(500).json({ error: 'Interner Serverfehler' });
   }
 });
 
-// POST /api/users – neuen Benutzer erstellen
+// POST /api/users – Benutzer erstellen
 router.post('/', async (req, res) => {
-  const { name, email, passwort } = req.body;
   try {
+    const { name, email, passwort } = req.body;
     const passwort_hash = await bcrypt.hash(passwort, 10);
-    const result = await pool.query(
-      'INSERT INTO benutzer (name, email, passwort_hash) VALUES ($1, $2, $3) RETURNING *',
-      [name, email, passwort_hash]
-    );
-    res.status(201).json(result.rows[0]);
+
+    const user = await crud.create(TABLE, { name, email, passwort_hash });
+    res.status(201).json(user);
   } catch (err) {
     console.error('Fehler beim Erstellen:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// PATCH /api/users/:id – Benutzer (teilweise) aktualisieren
+// PATCH /api/users/:id – Benutzer aktualisieren
 router.patch('/:id', async (req, res) => {
-  const id = req.params.id;
-  const { name, email, passwort } = req.body;
-
   try {
-    const updates = [];
-    const values = [];
-    let idx = 1;
+    const id = req.params.id;
+    const fields = { ...req.body };
 
-    if (name !== undefined) {
-      updates.push(`name = $${idx++}`);
-      values.push(name);
+    if (fields.passwort) {
+      fields.passwort_hash = await bcrypt.hash(fields.passwort, 10);
+      delete fields.passwort;
     }
 
-    if (email !== undefined) {
-      updates.push(`email = $${idx++}`);
-      values.push(email);
-    }
-
-    if (passwort) {
-      const passwort_hash = await bcrypt.hash(passwort, 10);
-      updates.push(`passwort_hash = $${idx++}`);
-      values.push(passwort_hash);
-    }
-
-    if (updates.length === 0) {
-      return res.status(400).json({ error: 'Keine Felder zum Aktualisieren angegeben.' });
-    }
-
-    values.push(id);
-    const result = await pool.query(
-      `UPDATE benutzer SET ${updates.join(', ')} WHERE id = $${idx} RETURNING id, name, email, erstellt_am`,
-      values
-    );
-
-    res.json(result.rows[0]);
-  } catch (error) {
-    console.error('Fehler beim Aktualisieren:', error);
-    res.status(500).json({ error: 'Interner Serverfehler' });
+    const user = await crud.updateById(TABLE, id, fields, ['name', 'email', 'passwort_hash']);
+    res.json(user);
+  } catch (err) {
+    console.error('Fehler beim Aktualisieren:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
 // DELETE /api/users/:id – Benutzer löschen
 router.delete('/:id', async (req, res) => {
-  const id = req.params.id;
   try {
-    await pool.query('DELETE FROM benutzer WHERE id = $1', [id]);
+    await crud.deleteById(TABLE, req.params.id);
     res.status(204).send();
-  } catch (error) {
-    console.error('Fehler beim Löschen:', error);
+  } catch (err) {
+    console.error('Fehler beim Löschen:', err.message);
     res.status(500).json({ error: 'Interner Serverfehler' });
   }
 });

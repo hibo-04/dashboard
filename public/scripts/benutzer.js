@@ -1,4 +1,3 @@
-// public/scripts/benutzer.js
 console.log("benutzer.js wurde geladen");
 
 async function fetchUserList() {
@@ -29,16 +28,30 @@ async function fetchUserList() {
     const tbody = document.createElement('tbody');
     users.forEach(user => {
       const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${user.id}</td>
-        <td>${user.name}</td>
-        <td>${user.email}</td>
-        <td>${user.erstellt_am || '-'}</td>
-        <td>
-          <button class="edit-btn" data-id="${user.id}">Bearbeiten</button>
-          <button class="delete-btn" data-id="${user.id}">Löschen</button>
-        </td>
-      `;
+
+      // ID-Zelle
+      const idCell = document.createElement('td');
+      idCell.textContent = user.id;
+      row.appendChild(idCell);
+
+      // Editable Zellen
+      row.appendChild(createEditableCell(user.id, 'name', user.name));
+      row.appendChild(createEditableCell(user.id, 'email', user.email));
+
+      // Erstellungsdatum
+      const erstelltCell = document.createElement('td');
+      erstelltCell.textContent = user.erstellt_am || '-';
+      row.appendChild(erstelltCell);
+
+      // Aktionen
+      const actionsCell = document.createElement('td');
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Löschen';
+      deleteBtn.classList.add('delete-btn');
+      deleteBtn.dataset.id = user.id;
+      actionsCell.appendChild(deleteBtn);
+      row.appendChild(actionsCell);
+
       tbody.appendChild(row);
     });
 
@@ -53,6 +66,67 @@ async function fetchUserList() {
   }
 }
 
+function createEditableCell(userId, field, value) {
+  const td = document.createElement('td');
+  td.innerHTML = `
+    <span class="cell-content">${value}</span>
+    <span class="edit-icon" style="cursor:pointer; margin-left: 8px;">✏️</span>
+  `;
+
+  td.querySelector('.edit-icon').addEventListener('click', () => {
+    const span = td.querySelector('.cell-content');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = span.textContent;
+    input.classList.add('inline-input');
+
+    td.replaceChild(input, span);
+    input.focus();
+
+    input.addEventListener('blur', () => saveInlineEdit(userId, field, input.value, td));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') input.blur();
+    });
+  });
+
+  return td;
+}
+
+async function saveInlineEdit(userId, field, value, td) {
+  try {
+    const response = await fetch(`https://dashboard-server-zm7f.onrender.com/api/users/${userId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [field]: value })
+    });
+
+    if (!response.ok) throw new Error('Update fehlgeschlagen');
+    const data = await response.json();
+
+    td.innerHTML = `
+      <span class="cell-content">${data[field]}</span>
+      <span class="edit-icon" style="cursor:pointer; margin-left: 8px;">✏️</span>
+    `;
+
+    td.querySelector('.edit-icon').addEventListener('click', () => {
+      const span = td.querySelector('.cell-content');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = span.textContent;
+      input.classList.add('inline-input');
+      td.replaceChild(input, span);
+      input.focus();
+      input.addEventListener('blur', () => saveInlineEdit(userId, field, input.value, td));
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') input.blur();
+      });
+    });
+
+  } catch (error) {
+    console.error('Fehler beim Speichern:', error);
+    alert('Fehler beim Speichern');
+  }
+}
 
 document.getElementById('benutzer-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -67,9 +141,9 @@ document.getElementById('benutzer-form').addEventListener('submit', async (e) =>
   });
 
   if (response.ok) {
-  alert('Benutzer erfolgreich erstellt');
-  document.getElementById('benutzer-form').reset();
-  fetchUserList();
+    alert('Benutzer erfolgreich erstellt');
+    document.getElementById('benutzer-form').reset();
+    fetchUserList();
   } else {
     alert('Fehler beim Erstellen');
   }

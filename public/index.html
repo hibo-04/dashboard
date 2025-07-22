@@ -10,8 +10,16 @@
       transform: translateX(-100%);
       transition: transform 0.3s ease;
     }
-    .sidebar { 
+    .sidebar {
       transition: transform 0.3s ease;
+    }
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .fade-in {
+      opacity: 1;
+      transition: opacity 0.2s ease;
     }
   </style>
 </head>
@@ -30,13 +38,21 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
     const routes = {
       dashboard: 'pages/dashboard.html',
       dienste: 'pages/dienste.html',
       benutzer: 'pages/benutzer.html',
       berichte: 'pages/berichte.html',
       einstellungen: 'pages/einstellungen.html',
+    };
+
+    const modules = {
+      dashboard: 'scripts/dashboard.js',
+      dienste: 'scripts/dienste.js',
+      benutzer: 'scripts/benutzer.js',
+      berichte: 'scripts/berichte.js',
+      einstellungen: 'scripts/einstellungen.js',
     };
 
     async function loadPage(hash) {
@@ -60,15 +76,14 @@
 
           content.innerHTML = html;
 
-          // Nachladen von Scripts aus dem HTML-Inhalt
-          const scripts = temp.querySelectorAll('script[src]');
-          scripts.forEach(oldScript => {
-            const newScript = document.createElement('script');
-            newScript.src = oldScript.src;
-            newScript.type = oldScript.type || 'text/javascript';
-            document.body.appendChild(newScript);
-          });
-
+          // Skriptmodul dynamisch importieren
+          if (modules[page]) {
+            try {
+              await import(`./${modules[page]}`);
+            } catch (err) {
+              console.error(`Fehler beim Laden von Modul ${modules[page]}:`, err);
+            }
+          }
 
           // Aktiven Menüpunkt markieren
           const links = document.querySelectorAll('.nav-menu a');

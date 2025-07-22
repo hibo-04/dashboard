@@ -1,19 +1,26 @@
 console.log("benutzer.js wurde geladen");
 
+let currentDeleteId = null;
+
+function showFeedback(msg) {
+  const el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.style.color = 'green';
+  setTimeout(() => el.textContent = '', 3000);
+}
+
 async function fetchUserList() {
   try {
     const res = await fetch('https://dashboard-server-zm7f.onrender.com/api/users/');
     const users = await res.json();
 
     const listContainer = document.getElementById('user-list');
-
     if (users.length === 0) {
       listContainer.innerHTML = '<p>Keine Benutzer vorhanden.</p>';
       return;
     }
 
     const table = document.createElement('table');
-
     const thead = document.createElement('thead');
     thead.innerHTML = `
       <tr>
@@ -29,29 +36,35 @@ async function fetchUserList() {
     users.forEach(user => {
       const row = document.createElement('tr');
 
-      // ID-Zelle
       const idCell = document.createElement('td');
       idCell.textContent = user.id;
       row.appendChild(idCell);
 
-      // Editable Zellen
-      row.appendChild(createEditableCell(user.id, 'name', user.name));
-      row.appendChild(createEditableCell(user.id, 'email', user.email));
+      const nameCell = document.createElement('td');
+      nameCell.textContent = user.name;
+      row.appendChild(nameCell);
 
-      // Erstellungsdatum
+      const emailCell = document.createElement('td');
+      emailCell.textContent = user.email;
+      row.appendChild(emailCell);
+
       const erstelltCell = document.createElement('td');
       erstelltCell.textContent = user.erstellt_am || '-';
       row.appendChild(erstelltCell);
 
-      // Aktionen
       const actionsCell = document.createElement('td');
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = 'Bearbeiten';
+      editBtn.addEventListener('click', () => openEditModal(user));
+      actionsCell.appendChild(editBtn);
+
       const deleteBtn = document.createElement('button');
       deleteBtn.textContent = 'Löschen';
-      deleteBtn.classList.add('delete-btn');
-      deleteBtn.dataset.id = user.id;
+      deleteBtn.addEventListener('click', () => openDeleteModal(user));
       actionsCell.appendChild(deleteBtn);
-      row.appendChild(actionsCell);
 
+      row.appendChild(actionsCell);
       tbody.appendChild(row);
     });
 
@@ -66,68 +79,70 @@ async function fetchUserList() {
   }
 }
 
-function createEditableCell(userId, field, value) {
-  const td = document.createElement('td');
-  td.innerHTML = `
-    <span class="cell-content">${value}</span>
-    <span class="edit-icon" style="cursor:pointer; margin-left: 8px;">✏️</span>
-  `;
-
-  td.querySelector('.edit-icon').addEventListener('click', () => {
-    const span = td.querySelector('.cell-content');
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = span.textContent;
-    input.classList.add('inline-input');
-
-    td.replaceChild(input, span);
-    input.focus();
-
-    input.addEventListener('blur', () => saveInlineEdit(userId, field, input.value, td));
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') input.blur();
-    });
-  });
-
-  return td;
+// Modal: Bearbeiten
+function openEditModal(user) {
+  document.getElementById('edit-id').value = user.id;
+  document.getElementById('edit-name').value = user.name;
+  document.getElementById('edit-email').value = user.email;
+  document.getElementById('edit-passwort').value = '';
+  document.getElementById('edit-modal').style.display = 'flex';
 }
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
 
-async function saveInlineEdit(userId, field, value, td) {
+document.getElementById('edit-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('edit-id').value;
+  const name = document.getElementById('edit-name').value;
+  const email = document.getElementById('edit-email').value;
+  const passwort = document.getElementById('edit-passwort').value;
+
+  const payload = { name, email };
+  if (passwort) payload.passwort = passwort;
+
   try {
-    const response = await fetch(`https://dashboard-server-zm7f.onrender.com/api/users/${userId}`, {
+    const res = await fetch(`https://dashboard-server-zm7f.onrender.com/api/users/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [field]: value })
+      body: JSON.stringify(payload)
     });
-
-    if (!response.ok) throw new Error('Update fehlgeschlagen');
-    const data = await response.json();
-
-    td.innerHTML = `
-      <span class="cell-content">${data[field]}</span>
-      <span class="edit-icon" style="cursor:pointer; margin-left: 8px;">✏️</span>
-    `;
-
-    td.querySelector('.edit-icon').addEventListener('click', () => {
-      const span = td.querySelector('.cell-content');
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.value = span.textContent;
-      input.classList.add('inline-input');
-      td.replaceChild(input, span);
-      input.focus();
-      input.addEventListener('blur', () => saveInlineEdit(userId, field, input.value, td));
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') input.blur();
-      });
-    });
-
-  } catch (error) {
-    console.error('Fehler beim Speichern:', error);
-    alert('Fehler beim Speichern');
+    if (!res.ok) throw new Error('Update fehlgeschlagen');
+    closeEditModal();
+    showFeedback('Benutzer erfolgreich bearbeitet');
+    fetchUserList();
+  } catch (err) {
+    alert('Fehler beim Speichern: ' + err.message);
   }
-}
+});
 
+// Modal: Löschen
+function openDeleteModal(user) {
+  currentDeleteId = user.id;
+  document.getElementById('delete-confirm-text').textContent = `Benutzer "${user.name}" wirklich löschen?`;
+  document.getElementById('delete-modal').style.display = 'flex';
+}
+function closeDeleteModal() {
+  currentDeleteId = null;
+  document.getElementById('delete-modal').style.display = 'none';
+}
+document.getElementById('cancel-delete').addEventListener('click', closeDeleteModal);
+document.getElementById('confirm-delete').addEventListener('click', async () => {
+  try {
+    const res = await fetch(`https://dashboard-server-zm7f.onrender.com/api/users/${currentDeleteId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) throw new Error('Löschen fehlgeschlagen');
+    closeDeleteModal();
+    showFeedback('Benutzer erfolgreich gelöscht');
+    fetchUserList();
+  } catch (err) {
+    alert('Fehler beim Löschen: ' + err.message);
+  }
+});
+
+// Benutzer erstellen
 document.getElementById('benutzer-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = document.getElementById('name').value;
@@ -141,7 +156,7 @@ document.getElementById('benutzer-form').addEventListener('submit', async (e) =>
   });
 
   if (response.ok) {
-    alert('Benutzer erfolgreich erstellt');
+    showFeedback('Benutzer erfolgreich erstellt');
     document.getElementById('benutzer-form').reset();
     fetchUserList();
   } else {

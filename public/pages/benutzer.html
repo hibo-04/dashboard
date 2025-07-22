@@ -1,6 +1,6 @@
 <div class="page-title" data-title="Benutzerverwaltung"></div>
 
-<!-- Neuen Benutzer anlegen-->
+<!-- Neuen Benutzer anlegen -->
 <form id="benutzer-form">
   <input type="text" id="name" placeholder="Name" required />
   <input type="email" id="email" placeholder="Email" required />
@@ -8,24 +8,61 @@
   <button type="submit">Benutzer erstellen</button>
 </form>
 
-<!-- Benutzerliste anzeigen-->
+<!-- Feedback -->
+<div id="feedback" style="margin-top: 10px; color: green;"></div>
+
+<!-- Benutzerliste anzeigen -->
 <section>
   <h2>Benutzerliste</h2>
   <div id="user-list">Lade Benutzer...</div>
 </section>
 
-<!-- Für zukünftige Erweiterung (Formular, Buttons etc.) -->
-<!--
-<section>
-  <h3>Neuen Benutzer hinzufügen</h3>
-  <form id="user-form">
-    <input type="text" name="name" placeholder="Name" required />
-    <input type="email" name="email" placeholder="E-Mail" required />
-    <input type="password" name="password" placeholder="Passwort" required />
-    <button type="submit">Benutzer hinzufügen</button>
-  </form>
-</section>
--->
+<!-- Bearbeiten-Modal -->
+<div id="edit-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Benutzer bearbeiten</h3>
+    <form id="edit-form">
+      <input type="hidden" id="edit-id">
+      <label for="edit-name">Name:</label>
+      <input type="text" id="edit-name" required><br>
+      <label for="edit-email">E-Mail:</label>
+      <input type="email" id="edit-email" required><br>
+      <label for="edit-passwort">Passwort (optional):</label>
+      <input type="password" id="edit-passwort"><br><br>
+      <button type="submit">Speichern</button>
+      <button type="button" id="cancel-edit">Abbrechen</button>
+    </form>
+  </div>
+</div>
 
-<!-- Benutzer-spezifisches JavaScript laden -->
+<!-- Löschen-Modal -->
+<div id="delete-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Benutzer löschen</h3>
+    <p id="delete-confirm-text"></p>
+    <button id="confirm-delete">Ja, löschen</button>
+    <button id="cancel-delete">Abbrechen</button>
+  </div>
+</div>
+
+<style>
+  .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    min-width: 300px;
+  }
+</style>
+
 <script src="/scripts/benutzer.js"></script>

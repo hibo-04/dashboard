@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
 // PATCH /api/users/:id – Benutzer (teilweise) aktualisieren
 router.patch('/:id', async (req, res) => {
   const id = req.params.id;
-  const { name, email } = req.body;
+  const { name, email, passwort } = req.body;
 
   try {
     const updates = [];
@@ -46,9 +46,16 @@ router.patch('/:id', async (req, res) => {
       updates.push(`name = $${idx++}`);
       values.push(name);
     }
+
     if (email !== undefined) {
       updates.push(`email = $${idx++}`);
       values.push(email);
+    }
+
+    if (passwort) {
+      const passwort_hash = await bcrypt.hash(passwort, 10);
+      updates.push(`passwort_hash = $${idx++}`);
+      values.push(passwort_hash);
     }
 
     if (updates.length === 0) {
@@ -57,13 +64,25 @@ router.patch('/:id', async (req, res) => {
 
     values.push(id);
     const result = await pool.query(
-      `UPDATE benutzer SET ${updates.join(', ')} WHERE id = $${idx} RETURNING *`,
+      `UPDATE benutzer SET ${updates.join(', ')} WHERE id = $${idx} RETURNING id, name, email, erstellt_am`,
       values
     );
 
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Fehler beim Aktualisieren:', error);
+    res.status(500).json({ error: 'Interner Serverfehler' });
+  }
+});
+
+// DELETE /api/users/:id – Benutzer löschen
+router.delete('/:id', async (req, res) => {
+  const id = req.params.id;
+  try {
+    await pool.query('DELETE FROM benutzer WHERE id = $1', [id]);
+    res.status(204).send();
+  } catch (error) {
+    console.error('Fehler beim Löschen:', error);
     res.status(500).json({ error: 'Interner Serverfehler' });
   }
 });

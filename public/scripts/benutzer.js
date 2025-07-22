@@ -1,13 +1,8 @@
+import { showNotification } from './utils/notifications.js';
+
 console.log("benutzer.js wurde geladen");
 
 let currentDeleteId = null;
-
-function showFeedback(msg) {
-  const el = document.getElementById('feedback');
-  el.textContent = msg;
-  el.style.color = 'green';
-  setTimeout(() => el.textContent = '', 3000);
-}
 
 async function fetchUserList() {
   try {
@@ -87,9 +82,11 @@ function openEditModal(user) {
   document.getElementById('edit-passwort').value = '';
   document.getElementById('edit-modal').style.display = 'flex';
 }
+
 function closeEditModal() {
   document.getElementById('edit-modal').style.display = 'none';
 }
+
 document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
 
 document.getElementById('edit-form').addEventListener('submit', async (e) => {
@@ -109,11 +106,12 @@ document.getElementById('edit-form').addEventListener('submit', async (e) => {
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error('Update fehlgeschlagen');
+
     closeEditModal();
-    showFeedback('Benutzer erfolgreich bearbeitet');
+    showNotification('Benutzer erfolgreich bearbeitet');
     fetchUserList();
   } catch (err) {
-    alert('Fehler beim Speichern: ' + err.message);
+    showNotification('Fehler beim Speichern: ' + err.message, 'error');
   }
 });
 
@@ -123,26 +121,30 @@ function openDeleteModal(user) {
   document.getElementById('delete-confirm-text').textContent = `Benutzer "${user.name}" wirklich löschen?`;
   document.getElementById('delete-modal').style.display = 'flex';
 }
+
 function closeDeleteModal() {
   currentDeleteId = null;
   document.getElementById('delete-modal').style.display = 'none';
 }
+
 document.getElementById('cancel-delete').addEventListener('click', closeDeleteModal);
+
 document.getElementById('confirm-delete').addEventListener('click', async () => {
   try {
     const res = await fetch(`https://dashboard-server-zm7f.onrender.com/api/users/${currentDeleteId}`, {
       method: 'DELETE'
     });
     if (!res.ok) throw new Error('Löschen fehlgeschlagen');
+
     closeDeleteModal();
-    showFeedback('Benutzer erfolgreich gelöscht');
+    showNotification('Benutzer erfolgreich gelöscht');
     fetchUserList();
   } catch (err) {
-    alert('Fehler beim Löschen: ' + err.message);
+    showNotification('Fehler beim Löschen: ' + err.message, 'error');
   }
 });
 
-// Benutzer erstellen
+// Formular: Neuer Benutzer
 document.getElementById('benutzer-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = document.getElementById('name').value;
@@ -156,11 +158,11 @@ document.getElementById('benutzer-form').addEventListener('submit', async (e) =>
   });
 
   if (response.ok) {
-    showFeedback('Benutzer erfolgreich erstellt');
+    showNotification('Benutzer erfolgreich erstellt');
     document.getElementById('benutzer-form').reset();
     fetchUserList();
   } else {
-    alert('Fehler beim Erstellen');
+    showNotification('Fehler beim Erstellen', 'error');
   }
 });
 

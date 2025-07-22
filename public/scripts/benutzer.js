@@ -1,4 +1,5 @@
 import { showNotification } from './utils/notifications.js';
+import { initFab } from './utils/fab.js';
 
 console.log("benutzer.js wurde geladen");
 
@@ -144,33 +145,7 @@ document.getElementById('confirm-delete').addEventListener('click', async () => 
   }
 });
 
-// Formular: Neuer Benutzer
-document.getElementById('benutzer-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const passwort = document.getElementById('passwort').value;
-
-  const response = await fetch('https://dashboard-server-zm7f.onrender.com/api/users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, passwort })
-  });
-
-  if (response.ok) {
-    showNotification('Benutzer erfolgreich erstellt');
-    document.getElementById('benutzer-form').reset();
-    fetchUserList();
-  } else {
-    showNotification('Fehler beim Erstellen', 'error');
-  }
-});
-
-// Floating Action Button – Öffnet Modal zum Erstellen
-document.getElementById('fab').addEventListener('click', () => {
-  document.getElementById('create-modal').style.display = 'flex';
-});
-
+// Modal: Benutzer erstellen
 document.getElementById('cancel-create').addEventListener('click', () => {
   document.getElementById('create-modal').style.display = 'none';
 });
@@ -198,5 +173,13 @@ document.getElementById('create-form').addEventListener('submit', async (e) => {
   }
 });
 
+// ✅ Initialisiere den zentralen Floating Action Button
+initFab({
+  icon: '＋',
+  tooltip: 'Benutzer hinzufügen',
+  onClick: () => {
+    document.getElementById('create-modal').style.display = 'flex';
+  }
+});
 
 fetchUserList();

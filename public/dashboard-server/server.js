@@ -9,7 +9,13 @@ const app = express();
 const PORT = process.env.PORT;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'https://dashboard-qhrr.onrender.com',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
+  credentials: false
+}));
+
 app.use(express.json());
 
 // Statische Dateien

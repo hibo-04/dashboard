@@ -1,50 +1,62 @@
-<div class="page-title" data-title="Benutzerverwaltung"></div>
-<link rel="stylesheet" href="./style.css" />
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benutzerverwaltung</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main>
+    <div class="page-title" data-title="Benutzerverwaltung"></div>
 
-<!-- Neuen Benutzer anlegen -->
-<form id="benutzer-form">
-  <input type="text" id="name" placeholder="Name" required />
-  <input type="email" id="email" placeholder="Email" required />
-  <input type="password" id="passwort" placeholder="Passwort" required />
-  <button type="submit">Benutzer erstellen</button>
-</form>
-
-<!-- Feedback -->
-<div id="feedback" style="margin-top: 10px; color: green;"></div>
-
-<!-- Benutzerliste anzeigen -->
-<section>
-  <h2>Benutzerliste</h2>
-  <div id="user-list">Lade Benutzer...</div>
-</section>
-
-<!-- Bearbeiten-Modal -->
-<div id="edit-modal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <h3>Benutzer bearbeiten</h3>
-    <form id="edit-form">
-      <input type="hidden" id="edit-id">
-      <label for="edit-name">Name:</label>
-      <input type="text" id="edit-name" required><br>
-      <label for="edit-email">E-Mail:</label>
-      <input type="email" id="edit-email" required><br>
-      <label for="edit-passwort">Passwort (optional):</label>
-      <input type="password" id="edit-passwort"><br><br>
-      <button type="submit">Speichern</button>
-      <button type="button" id="cancel-edit">Abbrechen</button>
+    <!-- Neuen Benutzer anlegen -->
+    <form id="benutzer-form">
+      <input type="text" id="name" placeholder="Name" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="passwort" placeholder="Passwort" required />
+      <button type="submit">Benutzer erstellen</button>
     </form>
-  </div>
-</div>
 
-<!-- Löschen-Modal -->
-<div id="delete-modal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <h3>Benutzer löschen</h3>
-    <p id="delete-confirm-text"></p>
-    <button id="confirm-delete">Ja, löschen</button>
-    <button id="cancel-delete">Abbrechen</button>
-  </div>
-</div>
+    <!-- Benutzerliste -->
+    <section>
+      <h2>Benutzerliste</h2>
+      <div id="user-list">Lade Benutzer...</div>
+    </section>
+  </main>
 
-<div id="notification-container" class="notification-container"></div>
-<script src="/scripts/benutzer.js"></script>
+  <!-- Bearbeiten-Modal -->
+  <div id="edit-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Benutzer bearbeiten</h3>
+      <form id="edit-form">
+        <input type="hidden" id="edit-id" />
+        <label for="edit-name">Name:</label>
+        <input type="text" id="edit-name" required /><br />
+        <label for="edit-email">E-Mail:</label>
+        <input type="email" id="edit-email" required /><br />
+        <label for="edit-passwort">Passwort (optional):</label>
+        <input type="password" id="edit-passwort" /><br /><br />
+        <button type="submit">Speichern</button>
+        <button type="button" id="cancel-edit">Abbrechen</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Löschen-Modal -->
+  <div id="delete-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Benutzer löschen</h3>
+      <p id="delete-confirm-text"></p>
+      <button id="confirm-delete">Ja, löschen</button>
+      <button id="cancel-delete">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Benachrichtigungscontainer -->
+  <div id="notification-container" class="notification-container"></div>
+
+  <!-- JavaScript -->
+  <script type="module" src="/scripts/benutzer.js"></script>
+</body>
+</html>

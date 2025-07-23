@@ -100,15 +100,29 @@ function closeDeleteModal() {
 
 // ✅ Initialisierung der Benutzer-Seite (wird von index.html aufgerufen)
 export function initBenutzerSeite() {
-  fetchUserList();
+  // Warte, bis der Inhalt im DOM sichtbar ist
+  setTimeout(() => {
+    document.getElementById('create-form')?.addEventListener('submit', handleCreate);
+    document.getElementById('edit-form')?.addEventListener('submit', handleEdit);
+    document.getElementById('cancel-edit')?.addEventListener('click', closeEditModal);
+    document.getElementById('confirm-delete')?.addEventListener('click', handleDelete);
+    document.getElementById('cancel-delete')?.addEventListener('click', closeDeleteModal);
+    document.getElementById('cancel-create')?.addEventListener('click', () => {
+      document.getElementById('create-modal').style.display = 'none';
+    });
 
-  initFab({
-    icon: '＋',
-    tooltip: 'Benutzer hinzufügen',
-    onClick: () => {
-      document.getElementById('create-modal').style.display = 'flex';
-    }
-  });
+    fetchUserList();
+
+    initFab({
+      icon: '＋',
+      tooltip: 'Benutzer hinzufügen',
+      onClick: () => {
+        document.getElementById('create-modal').style.display = 'flex';
+      }
+    });
+  }, 0);
+}
+
 
   document.getElementById('cancel-edit')?.addEventListener('click', closeEditModal);
 
@@ -180,4 +194,4 @@ export function initBenutzerSeite() {
       showNotification('Fehler beim Erstellen: ' + err.message, 'error');
     }
   });
-}
+

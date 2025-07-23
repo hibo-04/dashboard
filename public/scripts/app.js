@@ -5,7 +5,7 @@ const routes = {
   dienste: 'pages/dienste.html',
   benutzer: 'pages/benutzer.html',
   berichte: 'pages/berichte.html',
-  einstellungen: 'pages/einstellungen.html',
+  einstellungen: 'pages/einstellungen.html'
 };
 
 const modules = {
@@ -13,7 +13,7 @@ const modules = {
   dienste: 'scripts/dienste.js',
   benutzer: 'scripts/benutzer.js',
   berichte: 'scripts/berichte.js',
-  einstellungen: 'scripts/einstellungen.js',
+  einstellungen: 'scripts/einstellungen.js'
 };
 
 export async function loadPage(hash) {
@@ -37,14 +37,13 @@ export async function loadPage(hash) {
 
       content.innerHTML = html;
 
-      // Warten, bis das HTML im DOM angekommen ist
       requestAnimationFrame(async () => {
         if (modules[page]) {
           try {
             const mod = await import(`../${modules[page]}`);
             const initFn = `init${capitalize(page)}Seite`;
             if (typeof mod[initFn] === 'function') {
-              mod[initFn](); // z. B. initBenutzerSeite()
+              mod[initFn]();
             }
           } catch (err) {
             console.error(`Modul ${modules[page]} konnte nicht geladen werden:`, err);
@@ -65,22 +64,6 @@ export async function loadPage(hash) {
   }, 200);
 }
 
-export async function loadSidebar() {
-  const res = await fetch('components/sidebar.html');
-  const html = await res.text();
-  document.getElementById('sidebar').innerHTML = html;
-
-  const toggleBtn = document.getElementById('toggle-sidebar');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const sidebar = document.getElementById('sidebar');
-      const layout = document.querySelector('.layout');
-      sidebar.classList.toggle('active');
-      layout.classList.toggle('expanded');
-    });
-  }
-}
-
 function markActiveMenu(page) {
   const links = document.querySelectorAll('.nav-menu a');
   links.forEach(link => {
@@ -88,12 +71,5 @@ function markActiveMenu(page) {
   });
 }
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 window.addEventListener('hashchange', () => loadPage(location.hash));
-window.addEventListener('DOMContentLoaded', () => {
-  loadSidebar();
-  loadPage(location.hash);
-});
+window.addEventListener('DOMContentLoaded', () => loadPage(location.hash));

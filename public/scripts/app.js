@@ -37,18 +37,20 @@ export async function loadPage(hash) {
 
       content.innerHTML = html;
 
-      // Modul dynamisch importieren und Initialisierungsfunktion aufrufen
-      if (modules[page]) {
-        try {
-          const mod = await import(`../${modules[page]}`);
-          const initFn = `init${capitalize(page)}Seite`;
-          if (typeof mod[initFn] === 'function') {
-            mod[initFn]();
+      // Warten, bis das HTML im DOM angekommen ist
+      requestAnimationFrame(async () => {
+        if (modules[page]) {
+          try {
+            const mod = await import(`../${modules[page]}`);
+            const initFn = `init${capitalize(page)}Seite`;
+            if (typeof mod[initFn] === 'function') {
+              mod[initFn](); // z. B. initBenutzerSeite()
+            }
+          } catch (err) {
+            console.error(`Modul ${modules[page]} konnte nicht geladen werden:`, err);
           }
-        } catch (err) {
-          console.error(`Modul ${modules[page]} konnte nicht geladen werden:`, err);
         }
-      }
+      });
 
       markActiveMenu(page);
 

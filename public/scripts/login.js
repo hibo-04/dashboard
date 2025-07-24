@@ -1,4 +1,5 @@
 // public/scripts/login.js
+import { showNotification } from './utils/notifications.js';
 
 console.log("login.js geladen");
 
@@ -7,22 +8,27 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const email = document.getElementById('email').value;
   const passwort = document.getElementById('passwort').value;
 
-  const res = await fetch('https://dashboard-server-zm7f.onrender.com/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ email, passwort })
-  });
+  try {
+    const res = await fetch('https://dashboard-server-zm7f.onrender.com/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, passwort })
+    });
 
-  const feedback = document.getElementById('login-feedback');
+    if (!res.ok) {
+      const err = await res.json();
+      showNotification(err.error || 'Login fehlgeschlagen', 'error');
+      return;
+    }
 
-  if (res.ok) {
-    feedback.textContent = 'Login erfolgreich. Weiterleitung...';
+    const data = await res.json();
+    showNotification(`Willkommen, ${data.user.name}`, 'success');
     setTimeout(() => {
       location.href = '/#dashboard';
     }, 1000);
-  } else {
-    const err = await res.json();
-    feedback.textContent = err.error || 'Login fehlgeschlagen';
+  } catch (err) {
+    console.error('Login-Fehler:', err);
+    showNotification('Login fehlgeschlagen: ' + err.message, 'error');
   }
 });

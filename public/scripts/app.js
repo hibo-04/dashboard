@@ -73,7 +73,7 @@ function markActiveMenu(page) {
   });
 }
 
-async function loadSidebar() {
+export async function loadSidebar() {
   try {
     const res = await fetch('/components/sidebar.html'); // absoluter Pfad wichtig
     const html = await res.text();

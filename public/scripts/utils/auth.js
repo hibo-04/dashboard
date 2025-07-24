@@ -1,63 +1,38 @@
-// dashboard-server/routes/auth.js
-const express = require('express');
-const router = express.Router();
-const pool = require('../db');
-const bcrypt = require('bcrypt');
+// scripts/utils/auth.js
 
-// POST /api/login
-router.post('/login', async (req, res) => {
-  const { email, passwort } = req.body;
+import { showNotification } from './notifications.js';
+
+/**
+ * Aktuell eingeloggten Benutzer vom Server abrufen
+ * Gibt z. B. { id: 1, name: "Max", email: "..." } zurück
+ */
+export async function loadCurrentUser() {
   try {
-    const result = await pool.query('SELECT * FROM benutzer WHERE email = $1', [email]);
-    const user = result.rows[0];
-
-    if (!user) {
-      return res.status(401).json({ error: 'Benutzer nicht gefunden' });
-    }
-
-    const valid = await bcrypt.compare(passwort, user.passwort_hash);
-    if (!valid) {
-      return res.status(401).json({ error: 'Falsches Passwort' });
-    }
-
-    // Session speichern (explizit)
-    req.session.user = {
-      id: user.id,
-      name: user.name,
-      email: user.email
-    };
-
-    req.session.save(err => {
-      if (err) {
-        console.error('Fehler beim Speichern der Session:', err);
-        return res.status(500).json({ error: 'Session konnte nicht gespeichert werden' });
-      }
-      res.json({ message: 'Login erfolgreich', user: req.session.user });
+    const res = await fetch('https://dashboard-server-zm7f.onrender.com/api/me', {
+      credentials: 'include'
     });
+    if (!res.ok) return null;
+    return await res.json(); // user-Objekt direkt
   } catch (err) {
-    console.error('Login-Fehler:', err);
-    res.status(500).json({ error: 'Login fehlgeschlagen' });
+    console.error('Fehler bei /api/me:', err);
+    return null;
   }
-});
+}
 
-// POST /api/logout
-router.post('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Logout-Fehler:', err);
-      return res.status(500).json({ error: 'Logout fehlgeschlagen' });
-    }
-    res.clearCookie('connect.sid');
-    res.json({ message: 'Logout erfolgreich' });
-  });
-});
+/**
+ * Logout durchführen und zur Login-Seite weiterleiten
+ */
+export async function logoutUser() {
+  try {
+    const res = await fetch('https://dashboard-server-zm7f.onrender.com/api/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Fehler beim Logout');
 
-// GET /api/me
-router.get('/me', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ error: 'Nicht eingeloggt' });
+    showNotification('Erfolgreich ausgeloggt', 'success');
+    setTimeout(() => location.href = '/#login', 500);
+  } catch (err) {
+    showNotification(err.message, 'error');
   }
-  res.json(req.session.user);
-});
-
-module.exports = router;
+}

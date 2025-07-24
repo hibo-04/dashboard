@@ -11,19 +11,29 @@ router.post('/login', async (req, res) => {
     const result = await pool.query('SELECT * FROM benutzer WHERE email = $1', [email]);
     const user = result.rows[0];
 
-    if (!user) return res.status(401).json({ error: 'Benutzer nicht gefunden' });
+    if (!user) {
+      return res.status(401).json({ error: 'Benutzer nicht gefunden' });
+    }
 
     const valid = await bcrypt.compare(passwort, user.passwort_hash);
-    if (!valid) return res.status(401).json({ error: 'Falsches Passwort' });
+    if (!valid) {
+      return res.status(401).json({ error: 'Falsches Passwort' });
+    }
 
-    // Session speichern
+    // Session speichern (explizit)
     req.session.user = {
       id: user.id,
       name: user.name,
       email: user.email
     };
 
-    res.json({ message: 'Login erfolgreich', user: req.session.user });
+    req.session.save(err => {
+      if (err) {
+        console.error('Fehler beim Speichern der Session:', err);
+        return res.status(500).json({ error: 'Session konnte nicht gespeichert werden' });
+      }
+      res.json({ message: 'Login erfolgreich', user: req.session.user });
+    });
   } catch (err) {
     console.error('Login-Fehler:', err);
     res.status(500).json({ error: 'Login fehlgeschlagen' });

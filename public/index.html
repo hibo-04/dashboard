@@ -48,28 +48,36 @@
   import { loadCurrentUser, logoutUser } from './scripts/utils/auth.js';
 
   async function initApp() {
+    const user = await loadCurrentUser();
+
+    // Benutzername setzen
+    if (user) {
+      const nameEl = document.getElementById('user-name');
+      if (nameEl) nameEl.textContent = user.name;
+    }
+
+    // Seiten laden
     await loadSidebar();
     loadPage(location.hash);
 
-    // Topbar-Nutzername anzeigen
-    const user = await loadCurrentUser();
-    if (user) {
-      document.getElementById('user-name').textContent = user.name;
+    // Dropdown-Öffner
+    const userButton = document.getElementById('user-button');
+    const menu = document.getElementById('user-menu');
+
+    if (userButton && menu) {
+      userButton.addEventListener('click', () => {
+        menu.classList.toggle('show');
+      });
     }
 
-    // Dropdown-Handling
-    document.getElementById('user-button')?.addEventListener('click', () => {
-      document.getElementById('user-menu')?.classList.toggle('show');
-    });
-
-    // Logout-Funktion
+    // Logout
     document.getElementById('logout-btn')?.addEventListener('click', logoutUser);
   }
 
-  // Hashwechsel & Init
   window.addEventListener('hashchange', () => loadPage(location.hash));
   window.addEventListener('DOMContentLoaded', initApp);
 </script>
+
 
 </body>
 </html>

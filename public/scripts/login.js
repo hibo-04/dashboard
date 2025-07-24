@@ -47,7 +47,7 @@ form.addEventListener('submit', async (e) => {
 
     const data = await res.json();
     showNotification(`Willkommen, ${data.user.name}`, 'success');
-    setTimeout(() => location.href = '/#dashboard', 800);
+    setTimeout(() => location.href = '/#benutzer', 800);
   } catch (err) {
     showNotification('Netzwerkfehler beim Login.', 'error');
     loginButton.disabled = false;

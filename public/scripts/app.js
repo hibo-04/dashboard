@@ -5,7 +5,8 @@ const routes = {
   dienste: '/pages/dienste.html',
   benutzer: '/pages/benutzer.html',
   berichte: '/pages/berichte.html',
-  einstellungen: '/pages/einstellungen.html'
+  einstellungen: '/pages/einstellungen.html',
+  login: '/pages/login.html'
 };
 
 const modules = {
@@ -13,7 +14,8 @@ const modules = {
   dienste: '/scripts/dienste.js',
   benutzer: '/scripts/benutzer.js',
   berichte: '/scripts/berichte.js',
-  einstellungen: '/scripts/einstellungen.js'
+  einstellungen: '/scripts/einstellungen.js', 
+  login: '/scripts/login.js'
 };
 
 export async function loadPage(hash) {

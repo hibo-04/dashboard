@@ -2,6 +2,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const app = express();
@@ -9,21 +11,35 @@ const PORT = process.env.PORT || 3000;
 
 // === Middleware ===
 
-// CORS: nur Anfragen vom Frontend erlauben
+// CORS – Zugriff vom Frontend erlauben
 app.use(cors({
   origin: 'https://dashboard-qhrr.onrender.com',
+  credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type'],
-  credentials: false
+  allowedHeaders: ['Content-Type']
 }));
 
-// JSON-Parsing für eingehende Requests
+// Body Parsing & Cookies
 app.use(express.json());
+app.use(cookieParser());
 
-// Statische Dateien aus dem übergeordneten public-Verzeichnis
+// Session Setup (Cookie basiert)
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'supergeheim',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: true,              // Nur via HTTPS (bei Render notwendig)
+    sameSite: 'Lax',
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 Tage
+  }
+}));
+
+// Statische Dateien ausliefern (../public)
 app.use(express.static(path.join(__dirname, '..')));
 
-// === Logging (optional) ===
+// Logging
 app.use((req, res, next) => {
   console.log(`[${req.method}] ${req.originalUrl}`);
   next();
@@ -31,9 +47,11 @@ app.use((req, res, next) => {
 
 // === API-Routen ===
 const usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth'); // 🆕 Login, Logout, Me
 app.use('/api/users', usersRouter);
+app.use('/api', authRouter);
 
-// === Healthcheck/Diagnose ===
+// === Healthcheck ===
 app.get('/api/test-db', async (req, res) => {
   try {
     res.send(`DB-Zugriff erfolgreich – ${new Date().toISOString()}`);
@@ -43,8 +61,7 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// === Fallback für SPA (Single Page App) ===
-// Nur wenn kein /api/... aufgerufen wird → index.html zurückgeben
+// === Fallback für alle Nicht-API-Routen (SPA-Support) ===
 app.get('*', (req, res) => {
   if (req.originalUrl.startsWith('/api/')) {
     return res.status(404).json({ error: 'API-Route nicht gefunden' });
@@ -52,7 +69,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../index.html'));
 });
 
-// === Serverstart ===
+// Serverstart
 app.listen(PORT, () => {
   console.log(`✅ Server läuft auf Port ${PORT}`);
 });

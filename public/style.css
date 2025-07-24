@@ -250,6 +250,11 @@ td:hover .edit-icon {
   background-color: #e74c3c;
 }
 
+.input-error {
+  border: 2px solid red;
+  background-color: #ffeaea;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;

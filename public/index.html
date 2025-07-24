@@ -31,14 +31,45 @@
         <div class="topbar">
           <button id="toggle-sidebar" class="menu-button">☰</button>
           <h1 id="page-title">Dashboard</h1>
-          <div>👤 Max Mustermann</div>
+          <div class="user-dropdown">
+            <button id="user-button">👤 <span id="user-name">Gast</span> ⌄</button>
+            <div class="user-dropdown-content" id="user-menu">
+              <button id="logout-btn">Logout</button>
+            </div>
+          </div>
         </div>
         <div id="page-content"></div>
       </main>
     </div>
   </div>
 
-  <!-- 💡 Nur noch ein sauberer Import deiner App-Logik -->
-  <script type="module" src="/scripts/app.js"></script>
+  <script type="module">
+  import { loadPage } from './scripts/app.js';
+  import { loadCurrentUser, logoutUser } from './scripts/utils/auth.js';
+
+  async function initApp() {
+    await loadSidebar();
+    loadPage(location.hash);
+
+    // Topbar-Nutzername anzeigen
+    const user = await loadCurrentUser();
+    if (user) {
+      document.getElementById('user-name').textContent = user.name;
+    }
+
+    // Dropdown-Handling
+    document.getElementById('user-button')?.addEventListener('click', () => {
+      document.getElementById('user-menu')?.classList.toggle('show');
+    });
+
+    // Logout-Funktion
+    document.getElementById('logout-btn')?.addEventListener('click', logoutUser);
+  }
+
+  // Hashwechsel & Init
+  window.addEventListener('hashchange', () => loadPage(location.hash));
+  window.addEventListener('DOMContentLoaded', initApp);
+</script>
+
 </body>
 </html>

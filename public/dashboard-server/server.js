@@ -25,13 +25,13 @@ app.use(cookieParser());
 
 // Session Setup (Cookie basiert)
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'supergeheim',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
     secure: true,              // Nur via HTTPS (bei Render notwendig)
-    sameSite: 'Lax',
+    sameSite: 'none',
     maxAge: 1000 * 60 * 60 * 24 * 7 // 7 Tage
   }
 }));

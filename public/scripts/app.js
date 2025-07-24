@@ -1,19 +1,19 @@
 // public/scripts/app.js
 
 const routes = {
-  dashboard: 'pages/dashboard.html',
-  dienste: 'pages/dienste.html',
-  benutzer: 'pages/benutzer.html',
-  berichte: 'pages/berichte.html',
-  einstellungen: 'pages/einstellungen.html'
+  dashboard: '/pages/dashboard.html',
+  dienste: '/pages/dienste.html',
+  benutzer: '/pages/benutzer.html',
+  berichte: '/pages/berichte.html',
+  einstellungen: '/pages/einstellungen.html'
 };
 
 const modules = {
-  dashboard: 'scripts/dashboard.js',
-  dienste: 'scripts/dienste.js',
-  benutzer: 'scripts/benutzer.js',
-  berichte: 'scripts/berichte.js',
-  einstellungen: 'scripts/einstellungen.js'
+  dashboard: '/scripts/dashboard.js',
+  dienste: '/scripts/dienste.js',
+  benutzer: '/scripts/benutzer.js',
+  berichte: '/scripts/berichte.js',
+  einstellungen: '/scripts/einstellungen.js'
 };
 
 export async function loadPage(hash) {
@@ -40,7 +40,7 @@ export async function loadPage(hash) {
       requestAnimationFrame(async () => {
         if (modules[page]) {
           try {
-            const mod = await import(`../${modules[page]}`);
+            const mod = await import(`..${modules[page]}`); // wichtig: keine doppelten Slashes
             const initFn = `init${capitalize(page)}Seite`;
             if (typeof mod[initFn] === 'function') {
               mod[initFn]();
@@ -71,5 +71,32 @@ function markActiveMenu(page) {
   });
 }
 
+async function loadSidebar() {
+  try {
+    const res = await fetch('/components/sidebar.html'); // absoluter Pfad wichtig
+    const html = await res.text();
+    document.getElementById('sidebar').innerHTML = html;
+
+    const toggleBtn = document.getElementById('toggle-sidebar');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        const layout = document.querySelector('.layout');
+        sidebar.classList.toggle('active');
+        layout.classList.toggle('expanded');
+      });
+    }
+  } catch (err) {
+    console.error('Sidebar konnte nicht geladen werden:', err);
+  }
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 window.addEventListener('hashchange', () => loadPage(location.hash));
-window.addEventListener('DOMContentLoaded', () => loadPage(location.hash));
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadSidebar();
+  loadPage(location.hash);
+});

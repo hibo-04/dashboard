@@ -1,29 +1,63 @@
-// scripts/utils/auth.js
+// dashboard-server/routes/auth.js
+const express = require('express');
+const router = express.Router();
+const pool = require('../db');
+const bcrypt = require('bcrypt');
 
-import { showNotification } from './notifications.js';
-
-export async function loadCurrentUser() {
+// POST /api/login
+router.post('/login', async (req, res) => {
+  const { email, passwort } = req.body;
   try {
-    const res = await fetch('https://dashboard-server-zm7f.onrender.com/api/me', {
-      credentials: 'include'
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
+    const result = await pool.query('SELECT * FROM benutzer WHERE email = $1', [email]);
+    const user = result.rows[0];
 
-export async function logoutUser() {
-  try {
-    const res = await fetch('https://dashboard-server-zm7f.onrender.com/api/logout', {
-      method: 'POST',
-      credentials: 'include'
+    if (!user) {
+      return res.status(401).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    const valid = await bcrypt.compare(passwort, user.passwort_hash);
+    if (!valid) {
+      return res.status(401).json({ error: 'Falsches Passwort' });
+    }
+
+    // Session speichern (explizit)
+    req.session.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email
+    };
+
+    req.session.save(err => {
+      if (err) {
+        console.error('Fehler beim Speichern der Session:', err);
+        return res.status(500).json({ error: 'Session konnte nicht gespeichert werden' });
+      }
+      res.json({ message: 'Login erfolgreich', user: req.session.user });
     });
-    if (!res.ok) throw new Error('Fehler beim Logout');
-    showNotification('Erfolgreich ausgeloggt', 'success');
-    setTimeout(() => location.href = '/#login', 500);
   } catch (err) {
-    showNotification(err.message, 'error');
+    console.error('Login-Fehler:', err);
+    res.status(500).json({ error: 'Login fehlgeschlagen' });
   }
-}
+});
+
+// POST /api/logout
+router.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Logout-Fehler:', err);
+      return res.status(500).json({ error: 'Logout fehlgeschlagen' });
+    }
+    res.clearCookie('connect.sid');
+    res.json({ message: 'Logout erfolgreich' });
+  });
+});
+
+// GET /api/me
+router.get('/me', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Nicht eingeloggt' });
+  }
+  res.json(req.session.user);
+});
+
+module.exports = router;

@@ -16,7 +16,8 @@ app.use(cors({
   origin: 'https://dashboard-qhrr.onrender.com',
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type'],
+  exposedHeaders: ['Set-Cookie']
 }));
 
 // Body Parsing & Cookies

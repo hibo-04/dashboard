@@ -13,7 +13,6 @@ form.addEventListener('submit', async (e) => {
   const email = emailInput.value.trim();
   const passwort = passwortInput.value;
 
-  // Frontend-Validierung
   if (!email || !passwort) {
     showNotification('Bitte E-Mail und Passwort eingeben.', 'error');
     if (!email) emailInput.classList.add('input-error');
@@ -47,7 +46,7 @@ form.addEventListener('submit', async (e) => {
 
     const data = await res.json();
     showNotification(`Willkommen, ${data.user.name}`, 'success');
-    setTimeout(() => location.href = '/#benutzer', 800);
+    setTimeout(() => location.reload(), 800); // ⬅️ GANZ WICHTIG
   } catch (err) {
     showNotification('Netzwerkfehler beim Login.', 'error');
     loginButton.disabled = false;

@@ -44,39 +44,30 @@
   </div>
 
   <script type="module">
-  import { loadPage, loadSidebar } from './scripts/app.js';
-  import { loadCurrentUser, logoutUser } from './scripts/utils/auth.js';
+    import { loadPage, loadSidebar } from './scripts/app.js';
+    import { logoutUser, updateUserDisplay } from './scripts/utils/auth.js';
 
-  async function initApp() {
-    const user = await loadCurrentUser();
+    async function initApp() {
+      await loadSidebar();
+      await updateUserDisplay(); // ✅ Topbar aktualisieren
+      await loadPage(location.hash);
 
-    // Benutzername setzen
-    if (user) {
-      const nameEl = document.getElementById('user-name');
-      if (nameEl) nameEl.textContent = user.name;
+      const userButton = document.getElementById('user-button');
+      const menu = document.getElementById('user-menu');
+
+      if (userButton && menu) {
+        userButton.addEventListener('click', () => {
+          menu.classList.toggle('show');
+        });
+      }
+
+      document.getElementById('logout-btn')?.addEventListener('click', logoutUser);
     }
 
-    // Seiten laden
-    await loadSidebar();
-    loadPage(location.hash);
+    window.addEventListener('hashchange', () => loadPage(location.hash));
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
 
-    // Dropdown-Öffner
-    const userButton = document.getElementById('user-button');
-    const menu = document.getElementById('user-menu');
-
-    if (userButton && menu) {
-      userButton.addEventListener('click', () => {
-        menu.classList.toggle('show');
-      });
-    }
-
-    // Logout
-    document.getElementById('logout-btn')?.addEventListener('click', logoutUser);
-  }
-
-  window.addEventListener('hashchange', () => loadPage(location.hash));
-  window.addEventListener('DOMContentLoaded', initApp);
-</script>
 
 
 </body>

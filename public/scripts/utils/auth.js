@@ -1,10 +1,8 @@
 // scripts/utils/auth.js
-
 import { showNotification } from './notifications.js';
 
 /**
- * Aktuell eingeloggten Benutzer vom Server abrufen
- * Gibt z. B. { id: 1, name: "Max", email: "..." } zurück
+ * Aktuell eingeloggten Benutzer abrufen
  */
 export async function loadCurrentUser() {
   try {
@@ -12,7 +10,7 @@ export async function loadCurrentUser() {
       credentials: 'include'
     });
     if (!res.ok) return null;
-    return await res.json(); // user-Objekt direkt
+    return await res.json();
   } catch (err) {
     console.error('Fehler bei /api/me:', err);
     return null;
@@ -34,5 +32,18 @@ export async function logoutUser() {
     setTimeout(() => location.href = '/#login', 500);
   } catch (err) {
     showNotification(err.message, 'error');
+  }
+}
+
+/**
+ * Topbar-Name dynamisch aktualisieren
+ */
+export async function updateUserDisplay() {
+  const user = await loadCurrentUser();
+  const nameBox = document.getElementById('user-name');
+
+  if (nameBox) {
+    nameBox.textContent = user?.name || 'Gast';
+    nameBox.classList.toggle('gast', !user);
   }
 }
